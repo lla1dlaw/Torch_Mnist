@@ -13,13 +13,17 @@ import os
 
 # devicce config
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+if torch.cuda.is_available(): 
+    print("Using GPU")
+else:
+    print('Using CPU')
 
 # hyperparameters
 input_size = 784  # 28x28
 num_classes = 10
-hidden_size = 10
+hidden_size = 100
 num_hidden = 4
-num_epochs = 1
+num_epochs = 10
 batch_size = 100
 learning_rate = 0.001
 
@@ -69,7 +73,7 @@ model = NeuralNet(input_size, hidden_size, num_hidden, num_classes).to(device)
 
 #Loss and Optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9)
 
 #training loop
 n_total_step = len(train_loader)
