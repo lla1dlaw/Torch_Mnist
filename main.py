@@ -1,10 +1,15 @@
-#Feed Forward Neural Network Trained and Tested on MNIST dataset
 
+
+#Feed Forward Neural Network Trained and Tested on MNIST dataset
+import pprint
 import torch
 import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import os
 
 # devicce config
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -14,7 +19,7 @@ input_size = 784  # 28x28
 num_classes = 10
 hidden_size = 10
 num_hidden = 4
-num_epochs = 5
+num_epochs = 1
 batch_size = 100
 learning_rate = 0.001
 
@@ -39,16 +44,22 @@ for i in range(6):
 class NeuralNet(nn.Module):
     def __init__(self, input_size, hidden_size, num_hidden, num_classes):
         super(NeuralNet, self).__init__()
+
         self.input_size = input_size
+        
         self.layers = [nn.Linear(input_size, hidden_size)]
+
         for i in range(num_hidden-2): 
             self.layers.append(nn.Linear(hidden_size, hidden_size))
+        
         self.layers.append(nn.Linear(hidden_size, num_classes))
+        self.layers = nn.ModuleList(self.layers)
+        self.activation = nn.ReLU()
 
     def forward(self, x):
         for layer in self.layers[:-1]:
             x = layer(x)
-            x = nn.ReLU(x)
+            x = self.activation(x)
         x = self.layers[-1](x)
         # no activation and no softmax at the end
         return x
@@ -98,8 +109,20 @@ with torch.no_grad():
     acc = 100.0 * n_correct / n_samples
     print(f'Accuracy of the network on the 10000 test images: {acc} %')
 
-if input("Would you like to save this model? (y/n): ").lower() == "y":
-    model.save(model, 'model.pth')
+def save_csv(model, path):
+    state = model.state_dict()
+
+    os.makedirs(path, exist_ok=True)
+    for key, value in state.items():
+        pd.DataFrame(value.numpy()).to_csv(f"{path}\\{key}.csv", index=False, header=False)
+    
+    print(f"Model saved to: {os.getcwd()}\\{path}")
+
 
 if input("See state dictionary of the model? (y/n): ").lower() == "y":
-    pprint(model.state_dict())
+    print(f"\nState Dictionary Type: {type(model.state_dict())}")
+    pprint.pp(model.state_dict())
+
+if input("Would you like to save this model? (y/n): ").lower() == "y":
+    save_csv(model, "params")
+
