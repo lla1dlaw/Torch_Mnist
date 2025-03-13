@@ -34,17 +34,6 @@ test_dataset = torchvision.datasets.MNIST(root='./data', train=False, transform=
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-examples = iter(train_loader)
-samples, labels = next(examples)
-print(samples.shape, labels.shape)
-
-for i in range(6):
-    plt.subplot(2, 3, i + 1)
-    plt.imshow(samples[i][0], cmap='gray')
-
-
-# plt.show()
-
 class NeuralNet(nn.Module):
     def __init__(self, input_size, hidden_size, num_hidden, num_classes):
         super(NeuralNet, self).__init__()
@@ -118,7 +107,7 @@ def save_csv(model, path):
 
     os.makedirs(path, exist_ok=True)
     for key, value in state.items():
-        pd.DataFrame(value.numpy()).to_csv(f"{path}\\{key}.csv", index=False, header=False)
+        pd.DataFrame(value.cpu().numpy()).to_csv(f"{path}\\{key}.csv", index=False, header=False)
     
     print(f"Model saved to: {os.getcwd()}\\{path}")
 
